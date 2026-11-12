@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>CALCULADORA IMC</title>
+</head>
+<body>
+    <nav class="navbar bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="img/cecy.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                CALCULADORA IMC 
+            </a>
+        </div>
+    </nav>
+    <div class="container p-4 bg-info mt-5 card">
+        <h1 class="text-center">CALCULADORA IMC</h1> <hr>
+        <div class="row">
+
+            <div class="col">
+                <h5>PESO: <span id="vp">20</span> Kg</h5>
+                <input type="range" class="form-control" id="peso" min="20" max="200" value="20"> <br>
+
+                <h5>ESTATURA: <span id="ve">100</span> cm</h5>
+                <input type="range" class="form-control" id="estatura" min="100" max="220" value="100"> <br>
+
+                <button id="reset" class="btn btn-warning form-control mt-8">RESET</button>
+            </div>
+
+            <div class="col">
+                <h3 class="text-center">IMC</h3>
+                <div id="imc" class="text-center fs-3 fw-bold mb-3"></div>
+
+                <div id="bajo" class="rounded p-2 mb-2 text-center text-white bg-primary opacity-50">BAJO PESO</div>
+                <div id="normal" class="rounded p-2 mb-2 text-center text-white bg-success opacity-50">PESO NORMAL</div>
+                <div id="sobrepeso" class="rounded p-2 mb-2 text-center text-dark bg-warning opacity-50">SOBREPESO</div>
+                <div id="obesidad1" class="rounded p-2 mb-2 text-center text-white bg-danger opacity-50">OBESIDAD 1</div>
+                <div id="obesidad2" class="rounded p-2 mb-2 text-center text-white bg-danger opacity-50">OBESIDAD 2</div>
+                <div id="obesidad3" class="rounded p-2 mb-2 text-center text-white bg-danger opacity-50">OBESIDAD 3</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/appimc.js"></script>
+</body>
+</html>

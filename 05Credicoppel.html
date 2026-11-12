@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREDITO FAMSA</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body onload="calcular()">
+    <nav class="navbar bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="img/cecy.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                PRACTICAS JAVASCRIPT
+            </a>
+        </div>
+    </nav>
+
+    <div class="container p-4 bg-info mt-5 card">
+        <img src="img/famsa.webp" alt="Famsa" width="160" class="logo mx-auto d-block">
+        <h1 class="text-center">CREDITO FAMSA</h1> <hr>
+
+        <div class="row">
+            <!-- Columna 1: producto -->
+            <div class="col">
+                <h3>Producto</h3>
+                <select id="producto" class="form-control" onchange="calcular()">
+                    <option value="tv">TV</option>
+                    <option value="comedor">COMEDOR</option>
+                    <option value="lavadora">LAVADORA</option>
+                    <option value="moto">MOTO</option>
+                    <option value="sala">SALA</option>
+                </select>
+                <div id="img" class="mt-4"></div>
+                <div id="precio" class="resultado">Precio: $ 0.00 MXN</div>
+            </div>
+
+            <!-- Columna 2: plazo, cantidad y resultados -->
+            <div class="col">
+                <h3>Plazo</h3>
+                <div class="opciones">
+                    <label class="opcion"><input type="radio" name="plazo" id="uno" onchange="calcular()" checked> 6 Meses (+10%)</label>
+                    <label class="opcion"><input type="radio" name="plazo" id="dos" onchange="calcular()"> 12 Meses (+15%)</label>
+                    <label class="opcion"><input type="radio" name="plazo" id="tres" onchange="calcular()"> 18 Meses (+20%)</label>
+                </div>
+
+                <h3 class="mt-4">Cantidad</h3>
+                <input type="number" class="form-control" value="1" min="1" max="10" id="cantidad" onchange="calcular()">
+
+                <div id="contado" class="resultado mt-4">Precio de contado: $ 0.00 MXN</div>
+                <div id="credito" class="resultado">Precio a crédito: $ 0.00 MXN</div>
+                <div id="abono" class="resultado">Abono mensual: $ 0.00 MXN</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/05credicoppel.js"></script>
+</body>
+</html>

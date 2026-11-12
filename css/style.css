@@ -1,0 +1,286 @@
+/* ===== Variables ===== */
+:root {
+    --indigo: #2e3868;
+    --indigo-oscuro: #232b52;
+    --fondo: #e9ecf4;
+    --superficie: #ffffff;
+    --borde: #cfd5e6;
+    --texto: #222a40;
+    --texto-suave: #5a6382;
+    --dorado: #d4a24c;
+    --dorado-oscuro: #bb8a37;
+    --radio: 10px;
+    --sombra: 0 4px 14px rgba(35, 43, 82, 0.12);
+}
+
+/* ===== Base ===== */
+body {
+    background-color: var(--fondo);
+    min-height: 100vh;
+}
+
+h1, h2, h3 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+}
+
+h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    margin-bottom: 0.5rem;
+}
+
+hr {
+    border-color: var(--borde);
+    opacity: 1;
+}
+
+/* ===== Navbar: se deja con el estilo original de Bootstrap ===== */
+
+/* ===== Contenedor principal ===== */
+.container.card {
+    background-color: var(--superficie) !important;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    max-width: 1000px;
+    margin-bottom: 3rem;
+    color: var(--texto);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    line-height: 1.55;
+    text-align: center;
+}
+
+/* Controles angostos y centrados */
+.container.card #dia,
+.container.card #mes,
+.container.card #producto,
+.container.card #cantidad,
+.container.card #reset {
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.container.card h1 {
+    color: var(--indigo);
+    font-size: 2rem;
+    margin-top: 0.5rem;
+}
+
+/* ===== Centrado ===== */
+.container.card .row {
+    align-items: center;
+    justify-content: center;
+}
+
+.container.card .col {
+    text-align: center;
+}
+
+#mes,
+#producto,
+#cantidad {
+    text-align: center;
+    text-align-last: center;
+    cursor: pointer;
+}
+
+#signo {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ratio {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===== Controles ===== */
+.form-control {
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    color: var(--texto);
+    background-color: #f8f9fd;
+}
+
+.form-control:focus {
+    border-color: var(--indigo);
+    background-color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(46, 56, 104, 0.18);
+}
+
+#dia {
+    accent-color: var(--indigo);
+    padding: 0;
+    height: 1.6rem;
+    cursor: pointer;
+}
+
+#valorDia {
+    color: var(--indigo);
+    font-size: 1.1rem;
+}
+
+#mes {
+    cursor: pointer;
+}
+
+/* ===== Fecha ===== */
+#fecha {
+    background-color: #f1f3fa;
+    border: 1px solid var(--borde);
+    border-left: 4px solid var(--dorado);
+    border-radius: 8px;
+    padding: 0.9rem 0.5rem;
+    color: var(--indigo);
+    font-size: 1.5rem;
+}
+
+/* ===== Botón reset ===== */
+#reset {
+    background-color: var(--dorado);
+    border: none;
+    border-radius: 8px;
+    color: #2a2208;
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    transition: background-color 0.2s ease;
+}
+
+#reset:hover {
+    background-color: var(--dorado-oscuro);
+}
+
+#reset:active {
+    transform: translateY(1px);
+}
+
+/* ===== Imagen del signo y video ===== */
+#signo {
+    display: block;
+    height: auto;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: #f8f9fd;
+    padding: 0.5rem;
+}
+
+.ratio video {
+    background-color: #000;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    object-fit: cover;
+}
+
+/* ===== Página de crédito ===== */
+.logo {
+    margin-bottom: 0.5rem;
+}
+
+/* Imagen del producto (la inserta el JS dentro de #img) */
+#img img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: #f8f9fd;
+    padding: 0.5rem;
+}
+
+/* Opciones de plazo */
+.opciones {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+}
+
+.opcion {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 220px;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    background-color: #f8f9fd;
+    cursor: pointer;
+}
+
+.opcion input {
+    accent-color: var(--indigo);
+    cursor: pointer;
+}
+
+.opcion:has(input:checked) {
+    border-color: var(--indigo);
+    background-color: #eef0fa;
+    font-weight: 600;
+}
+
+/* Cajas de precios */
+.resultado {
+    background-color: #f1f3fa;
+    border: 1px solid var(--borde);
+    border-left: 4px solid var(--dorado);
+    border-radius: 8px;
+    padding: 0.7rem 0.5rem;
+    margin-top: 1rem;
+    color: var(--indigo);
+}
+
+.resultado h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+#abono {
+    background-color: #e6e9f6;
+    border-left-color: var(--indigo);
+}
+
+#abono h3 {
+    font-size: 1.4rem;
+}
+
+/* ===== Accesibilidad ===== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid var(--dorado);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 767px) {
+    .container.card {
+        margin-top: 1.5rem !important;
+        padding: 1.25rem !important;
+    }
+
+    .container.card h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Al apilar las columnas, separa un poco los bloques */
+    .row > .col {
+        flex: 0 0 100%;
+        margin-bottom: 1.5rem;
+    }
+
+    #fecha {
+        font-size: 1.25rem;
+        margin-top: 1.5rem !important;
+    }
+}
