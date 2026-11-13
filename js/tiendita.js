@@ -57,8 +57,8 @@ const eliminarProducto = (posicion) => {
         text: "Estas seguro de eliminar este registro?",
         icon: "error",
         showCancelButton: true,
-        confirmButtonText: '<i class="bi bi-check-lg"></i> SI',
-        cancelButtonText: '<i class="bi bi-x-lg"></i> NO',
+        confirmButtonText: "SI",
+        cancelButtonText: "NO",
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
@@ -69,7 +69,8 @@ const eliminarProducto = (posicion) => {
                 title: "EXITO!!",
                 text: "Se elimino correctamente",
                 icon: "success",
-                confirmButtonText: '<i class="bi bi-check-lg"></i> OK'
+                confirmButtonText: "OK",
+                confirmButtonColor: "coral" 
             });
         }
     });
