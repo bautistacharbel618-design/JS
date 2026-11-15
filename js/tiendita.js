@@ -1,121 +1,271 @@
-const modal = document.getElementById("addProducto");
-const modalEdit = document.getElementById("editProducto");
+const $ = (id) => document.getElementById(id);
+const dialogProducto = $("dlgProducto");
+const dialogCategoria = $("dlgCategoria");
+
 let productos = JSON.parse(localStorage.getItem("productos")) || [];
+let categorias = JSON.parse(localStorage.getItem("categorias")) || [];
 
-/* ---------- AGREGAR ---------- */
-const btnSave = document.getElementById("btnSave");
-btnSave.onclick = () => {
-    const txtNombre = document.getElementById("nombre");
-    const txtPrecio = document.getElementById("precio");
-    const txtStock = document.getElementById("stock");
+const guardarProductos = () => localStorage.setItem("productos", JSON.stringify(productos));
+const guardarCategorias = () => localStorage.setItem("categorias", JSON.stringify(categorias));
 
-    if (txtNombre.value.trim() === "" || txtPrecio.value === "" || txtStock.value === "") {
-        alert("ERROR: CAMPOS VACIOS");
-        return;
-    }
+const escapar = (txt) => String(txt).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-    productos.push({
-        nombre: txtNombre.value.trim(),
-        precio: parseFloat(txtPrecio.value),
-        stock: parseInt(txtStock.value)
-    });
-    localStorage.setItem("productos", JSON.stringify(productos));
+const leerImagen = (file) => new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+});
 
-    txtNombre.value = "";
-    txtPrecio.value = "";
-    txtStock.value = "";
-    modal.close();
-    cargarProductos();
-};
+const exito = (texto) => Swal.fire({
+    title: "EXITO!!",
+    text: texto,
+    icon: "success",
+    confirmButtonText: "OK",
+    confirmButtonColor: "coral"
+});
 
-/* ---------- MOSTRAR ---------- */
-const cargarProductos = () => {
-    productos = JSON.parse(localStorage.getItem("productos")) || [];
-    const tbody = document.getElementById("productos");
-    let tabla = "";
+const error = (texto, destino = document.body) => Swal.fire({
+    title: "ERROR",
+    text: texto,
+    icon: "error",
+    confirmButtonText: "OK",
+    confirmButtonColor: "coral",
+    target: destino
+});
 
-    productos.forEach((producto, posicion) => {
-        tabla += `<tr class="text-center">
-            <td><b>${producto.nombre.toUpperCase()}</b></td>
-            <td><b>$ ${parseFloat(producto.precio).toFixed(2)}</b></td>
-            <td><b>${producto.stock}</b></td>
-            <td>
-                <button class="btn-solid theme-danger" onclick="eliminarProducto(${posicion})"><i class="bi bi-trash3"></i></button>
-                <button class="btn-solid theme-warning" onclick="editarProducto(${posicion})"><i class="bi bi-pencil"></i></button>
-            </td>
-        </tr>`;
-    });
-
-    tbody.innerHTML = tabla;
-};
-cargarProductos();
-
-/* ---------- ELIMINAR ---------- */
-const eliminarProducto = (posicion) => {
-    const swalWithBootstrapButtons = Swal.mixin({
+const confirmar = (texto) => {
+    const swal = Swal.mixin({
         customClass: {
             confirmButton: "btn-solid theme-success mx-5",
             cancelButton: "btn-solid theme-danger"
         },
         buttonsStyling: false
     });
-
-    swalWithBootstrapButtons.fire({
+    return swal.fire({
         title: "ELIMINAR REGISTRO",
-        text: "Estas seguro de eliminar este registro?",
+        text: texto,
         icon: "error",
         showCancelButton: true,
         confirmButtonText: "SI",
         cancelButtonText: "NO",
         reverseButtons: true
-    }).then((result) => {
+    });
+};
+
+const sidebar = $("sidebar");
+
+$("btnMenu").onclick = () => sidebar.classList.toggle("d-none");
+
+if (window.innerWidth < 768) sidebar.classList.add("d-none");
+
+const mostrarSeccion = (idSeccion, idMenu) => {
+    $("seccionProductos").style.display = idSeccion === "seccionProductos" ? "" : "none";
+    $("seccionCategorias").style.display = idSeccion === "seccionCategorias" ? "" : "none";
+
+    document.querySelectorAll("#sidebar .nav-link").forEach((a) => a.classList.remove("active"));
+    $(idMenu).classList.add("active");
+
+    if (window.innerWidth < 768) sidebar.classList.add("d-none");
+};
+
+const cargarSelectCategorias = (seleccionada = "") => {
+    $("categoria").innerHTML = categorias
+        .map((c) => `<option value="${escapar(c)}" ${c === seleccionada ? "selected" : ""}>${escapar(c)}</option>`)
+        .join("");
+};
+
+const cargarProductos = () => {
+    let tabla = "";
+    productos.forEach((p, i) => {
+        tabla += `<tr class="text-center">
+            <td>${p.imagen ? `<img src="${p.imagen}" alt="" width="50" height="50" style="object-fit:cover">` : ""}</td>
+            <td><b>${escapar(p.nombre).toUpperCase()}</b></td>
+            <td><b>${escapar(p.categoria || "")}</b></td>
+            <td><b>$ ${parseFloat(p.precio).toFixed(2)}</b></td>
+            <td><b>${p.stock}</b></td>
+            <td>
+                <button class="btn-solid theme-danger" onclick="eliminarProducto(${i})"><i class="bi bi-trash3"></i></button>
+                <button class="btn-solid theme-warning" onclick="editarProducto(${i})"><i class="bi bi-pencil"></i></button>
+            </td>
+        </tr>`;
+    });
+    $("productos").innerHTML = tabla;
+};
+
+const limpiarFormProducto = () => {
+    $("nombre").value = "";
+    $("precio").value = "";
+    $("stock").value = "";
+    $("imagen").value = "";
+    $("posicion").value = "";
+    $("preview").src = "";
+    $("preview").style.display = "none";
+};
+
+const cerrarProducto = () => dialogProducto.close();
+
+const nuevoProducto = () => {
+    if (categorias.length === 0) {
+        error("PRIMERO AGREGA UNA CATEGORIA");
+        return;
+    }
+    limpiarFormProducto();
+    cargarSelectCategorias();
+    $("tituloProducto").textContent = "AGREGAR PRODUCTO";
+    dialogProducto.showModal();
+};
+
+const editarProducto = (posicion) => {
+    const p = productos[posicion];
+    limpiarFormProducto();
+    cargarSelectCategorias(p.categoria);
+    $("nombre").value = p.nombre;
+    $("precio").value = p.precio;
+    $("stock").value = p.stock;
+    $("posicion").value = posicion;
+    if (p.imagen) {
+        $("preview").src = p.imagen;
+        $("preview").style.display = "block";
+    }
+    $("tituloProducto").textContent = "EDITAR PRODUCTO";
+    dialogProducto.showModal();
+};
+
+$("imagen").onchange = async () => {
+    const file = $("imagen").files[0];
+    if (file) {
+        $("preview").src = await leerImagen(file);
+        $("preview").style.display = "block";
+    }
+};
+
+$("btnSave").onclick = async () => {
+    const nombre = $("nombre").value.trim();
+    const precio = parseFloat($("precio").value);
+    const stock = parseInt($("stock").value);
+    const categoria = $("categoria").value;
+    const posicion = $("posicion").value;
+    const file = $("imagen").files[0];
+
+    if (nombre === "" || $("precio").value === "" || $("stock").value === "" || categoria === "") {
+        error("CAMPOS VACIOS", dialogProducto);
+        return;
+    }
+    if (isNaN(precio) || precio < 0 || isNaN(stock) || stock < 0) {
+        error("PRECIO Y STOCK DEBEN SER NUMEROS VALIDOS", dialogProducto);
+        return;
+    }
+
+    const esEdicion = posicion !== "";
+    let imagen = esEdicion ? (productos[posicion].imagen || "") : "";
+    if (file) imagen = await leerImagen(file);
+
+    const producto = { nombre, precio, stock, categoria, imagen };
+
+    const respaldo = JSON.stringify(productos);
+    if (esEdicion) productos[posicion] = producto;
+    else productos.push(producto);
+
+    try {
+        guardarProductos();
+    } catch (e) {
+        productos = JSON.parse(respaldo);
+        error("NO HAY ESPACIO, USA UNA IMAGEN MAS PEQUEÑA", dialogProducto);
+        return;
+    }
+
+    dialogProducto.close();
+    cargarProductos();
+};
+
+const eliminarProducto = (posicion) => {
+    confirmar("Estas seguro de eliminar este registro?").then((result) => {
         if (result.isConfirmed) {
             productos.splice(posicion, 1);
-            localStorage.setItem("productos", JSON.stringify(productos));
+            guardarProductos();
             cargarProductos();
-            Swal.fire({
-                title: "EXITO!!",
-                text: "Se elimino correctamente",
-                icon: "success",
-                confirmButtonText: "OK",
-                confirmButtonColor: "coral"
-            });
+            exito("Se elimino correctamente");
         }
     });
 };
 
-
-const editarProducto = (posicion) => {
-    const producto = productos[posicion];
-    document.getElementById("nombree").value = producto.nombre;
-    document.getElementById("precioe").value = producto.precio;
-    document.getElementById("stocke").value = producto.stock;
-    document.getElementById("posicion").value = posicion;
-    // Abre el dialog directamente (no depende de bootstrap)
-    modalEdit.showModal();
+const cargarCategorias = () => {
+    let tabla = "";
+    categorias.forEach((c, i) => {
+        tabla += `<tr class="text-center">
+            <td><b>${escapar(c).toUpperCase()}</b></td>
+            <td>
+                <button class="btn-solid theme-danger" onclick="eliminarCategoria(${i})"><i class="bi bi-trash3"></i></button>
+                <button class="btn-solid theme-warning" onclick="editarCategoria(${i})"><i class="bi bi-pencil"></i></button>
+            </td>
+        </tr>`;
+    });
+    $("categorias").innerHTML = tabla;
 };
 
-const btnUpdate = document.getElementById("btnUpdate");
-btnUpdate.onclick = () => {
-    const txtNombre = document.getElementById("nombree");
-    const txtPrecio = document.getElementById("precioe");
-    const txtStock = document.getElementById("stocke");
-    const posicion = document.getElementById("posicion");
+const cerrarCategoria = () => dialogCategoria.close();
 
-    if (txtNombre.value.trim() === "" || txtPrecio.value === "" || txtStock.value === "") {
-        alert("ERROR: CAMPOS VACIOS");
+const nuevaCategoria = () => {
+    $("nombreCat").value = "";
+    $("posicionCat").value = "";
+    $("tituloCategoria").textContent = "AGREGAR CATEGORIA";
+    dialogCategoria.showModal();
+};
+
+const editarCategoria = (posicion) => {
+    $("nombreCat").value = categorias[posicion];
+    $("posicionCat").value = posicion;
+    $("tituloCategoria").textContent = "EDITAR CATEGORIA";
+    dialogCategoria.showModal();
+};
+
+$("btnSaveCat").onclick = () => {
+    const nombre = $("nombreCat").value.trim();
+    const posicion = $("posicionCat").value;
+
+    if (nombre === "") {
+        error("CAMPOS VACIOS", dialogCategoria);
         return;
     }
 
-    productos[posicion.value].nombre = txtNombre.value.trim();
-    productos[posicion.value].precio = parseFloat(txtPrecio.value);
-    productos[posicion.value].stock = parseInt(txtStock.value);
-    localStorage.setItem("productos", JSON.stringify(productos));
+    const repetida = categorias.some((c, i) =>
+        c.toLowerCase() === nombre.toLowerCase() && String(i) !== posicion);
+    if (repetida) {
+        error("LA CATEGORIA YA EXISTE", dialogCategoria);
+        return;
+    }
 
-    txtNombre.value = "";
-    txtPrecio.value = "";
-    txtStock.value = "";
-    modalEdit.close();
+    if (posicion !== "") {
+        const anterior = categorias[posicion];
+        productos.forEach((p) => { if (p.categoria === anterior) p.categoria = nombre; });
+        categorias[posicion] = nombre;
+        guardarProductos();
+    } else {
+        categorias.push(nombre);
+    }
 
+    guardarCategorias();
+    dialogCategoria.close();
+    cargarCategorias();
     cargarProductos();
 };
+
+const eliminarCategoria = (posicion) => {
+    const nombre = categorias[posicion];
+    if (productos.some((p) => p.categoria === nombre)) {
+        error("HAY PRODUCTOS CON ESTA CATEGORIA");
+        return;
+    }
+    confirmar("Estas seguro de eliminar esta categoria?").then((result) => {
+        if (result.isConfirmed) {
+            categorias.splice(posicion, 1);
+            guardarCategorias();
+            cargarCategorias();
+            exito("Se elimino correctamente");
+        }
+    });
+};
+
+cargarCategorias();
+cargarProductos();
