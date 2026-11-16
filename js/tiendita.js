@@ -1,41 +1,49 @@
-const $ = (id) => document.getElementById(id);
-const dialogProducto = $("dlgProducto");
-const dialogCategoria = $("dlgCategoria");
+var dialogProducto = document.getElementById("dlgProducto");
+var dialogCategoria = document.getElementById("dlgCategoria");
+var sidebar = document.getElementById("sidebar");
 
-let productos = JSON.parse(localStorage.getItem("productos")) || [];
-let categorias = JSON.parse(localStorage.getItem("categorias")) || [];
+var productos = JSON.parse(localStorage.getItem("productos")) || [];
+var categorias = JSON.parse(localStorage.getItem("categorias")) || [];
 
-const guardarProductos = () => localStorage.setItem("productos", JSON.stringify(productos));
-const guardarCategorias = () => localStorage.setItem("categorias", JSON.stringify(categorias));
+function guardarProductos() {
+    localStorage.setItem("productos", JSON.stringify(productos));
+}
 
-const escapar = (txt) => String(txt).replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function guardarCategorias() {
+    localStorage.setItem("categorias", JSON.stringify(categorias));
+}
 
-const leerImagen = (file) => new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
+function leerImagen(file, callback) {
+    var reader = new FileReader();
+    reader.onload = function () {
+        callback(reader.result);
+    };
     reader.readAsDataURL(file);
-});
+}
 
-const exito = (texto) => Swal.fire({
-    title: "EXITO!!",
-    text: texto,
-    icon: "success",
-    confirmButtonText: "OK",
-    confirmButtonColor: "coral"
-});
+function exito(texto) {
+    Swal.fire({
+        title: "EXITO!!",
+        text: texto,
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: "coral"
+    });
+}
 
-const error = (texto, destino = document.body) => Swal.fire({
-    title: "ERROR",
-    text: texto,
-    icon: "error",
-    confirmButtonText: "OK",
-    confirmButtonColor: "coral",
-    target: destino
-});
+function error(texto, destino) {
+    Swal.fire({
+        title: "ERROR",
+        text: texto,
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "coral",
+        target: destino || document.body
+    });
+}
 
-const confirmar = (texto) => {
-    const swal = Swal.mixin({
+function confirmar(texto) {
+    var swal = Swal.mixin({
         customClass: {
             confirmButton: "btn-solid theme-success mx-5",
             cancelButton: "btn-solid theme-danger"
@@ -51,104 +59,152 @@ const confirmar = (texto) => {
         cancelButtonText: "NO",
         reverseButtons: true
     });
+}
+
+document.getElementById("btnMenu").onclick = function () {
+    sidebar.classList.toggle("d-none");
 };
 
-const sidebar = $("sidebar");
+if (window.innerWidth < 768) {
+    sidebar.classList.add("d-none");
+}
 
-$("btnMenu").onclick = () => sidebar.classList.toggle("d-none");
+function mostrarSeccion(idSeccion, idMenu) {
+    if (idSeccion === "seccionProductos") {
+        document.getElementById("seccionProductos").style.display = "";
+        document.getElementById("seccionCategorias").style.display = "none";
+    } else {
+        document.getElementById("seccionProductos").style.display = "none";
+        document.getElementById("seccionCategorias").style.display = "";
+    }
 
-if (window.innerWidth < 768) sidebar.classList.add("d-none");
+    var links = document.querySelectorAll("#sidebar .nav-link");
+    for (var i = 0; i < links.length; i++) {
+        links[i].classList.remove("active");
+    }
+    document.getElementById(idMenu).classList.add("active");
 
-const mostrarSeccion = (idSeccion, idMenu) => {
-    $("seccionProductos").style.display = idSeccion === "seccionProductos" ? "" : "none";
-    $("seccionCategorias").style.display = idSeccion === "seccionCategorias" ? "" : "none";
+    if (window.innerWidth < 768) {
+        sidebar.classList.add("d-none");
+    }
+}
 
-    document.querySelectorAll("#sidebar .nav-link").forEach((a) => a.classList.remove("active"));
-    $(idMenu).classList.add("active");
+function cargarSelectCategorias(seleccionada) {
+    var opciones = "";
+    for (var i = 0; i < categorias.length; i++) {
+        var sel = "";
+        if (categorias[i] === seleccionada) {
+            sel = "selected";
+        }
+        opciones += '<option value="' + categorias[i] + '" ' + sel + '>' + categorias[i] + '</option>';
+    }
+    document.getElementById("categoria").innerHTML = opciones;
+}
 
-    if (window.innerWidth < 768) sidebar.classList.add("d-none");
-};
+function cargarProductos() {
+    var tabla = "";
+    for (var i = 0; i < productos.length; i++) {
+        var p = productos[i];
+        var img = "";
+        if (p.imagen) {
+            img = '<img src="' + p.imagen + '" alt="" width="50" height="50" style="object-fit:cover">';
+        }
+        tabla += '<tr class="text-center">' +
+            '<td>' + img + '</td>' +
+            '<td><b>' + p.nombre.toUpperCase() + '</b></td>' +
+            '<td><b>' + (p.categoria || "") + '</b></td>' +
+            '<td><b>$ ' + parseFloat(p.precio).toFixed(2) + '</b></td>' +
+            '<td><b>' + p.stock + '</b></td>' +
+            '<td>' +
+            '<button class="btn-solid theme-danger" onclick="eliminarProducto(' + i + ')"><i class="bi bi-trash3"></i></button> ' +
+            '<button class="btn-solid theme-warning" onclick="editarProducto(' + i + ')"><i class="bi bi-pencil"></i></button>' +
+            '</td>' +
+            '</tr>';
+    }
+    document.getElementById("productos").innerHTML = tabla;
+}
 
-const cargarSelectCategorias = (seleccionada = "") => {
-    $("categoria").innerHTML = categorias
-        .map((c) => `<option value="${escapar(c)}" ${c === seleccionada ? "selected" : ""}>${escapar(c)}</option>`)
-        .join("");
-};
+function limpiarFormProducto() {
+    document.getElementById("nombre").value = "";
+    document.getElementById("precio").value = "";
+    document.getElementById("stock").value = "";
+    document.getElementById("imagen").value = "";
+    document.getElementById("posicion").value = "";
+    document.getElementById("preview").src = "";
+    document.getElementById("preview").style.display = "none";
+}
 
-const cargarProductos = () => {
-    let tabla = "";
-    productos.forEach((p, i) => {
-        tabla += `<tr class="text-center">
-            <td>${p.imagen ? `<img src="${p.imagen}" alt="" width="50" height="50" style="object-fit:cover">` : ""}</td>
-            <td><b>${escapar(p.nombre).toUpperCase()}</b></td>
-            <td><b>${escapar(p.categoria || "")}</b></td>
-            <td><b>$ ${parseFloat(p.precio).toFixed(2)}</b></td>
-            <td><b>${p.stock}</b></td>
-            <td>
-                <button class="btn-solid theme-danger" onclick="eliminarProducto(${i})"><i class="bi bi-trash3"></i></button>
-                <button class="btn-solid theme-warning" onclick="editarProducto(${i})"><i class="bi bi-pencil"></i></button>
-            </td>
-        </tr>`;
-    });
-    $("productos").innerHTML = tabla;
-};
+function cerrarProducto() {
+    dialogProducto.close();
+}
 
-const limpiarFormProducto = () => {
-    $("nombre").value = "";
-    $("precio").value = "";
-    $("stock").value = "";
-    $("imagen").value = "";
-    $("posicion").value = "";
-    $("preview").src = "";
-    $("preview").style.display = "none";
-};
-
-const cerrarProducto = () => dialogProducto.close();
-
-const nuevoProducto = () => {
+function nuevoProducto() {
     if (categorias.length === 0) {
         error("PRIMERO AGREGA UNA CATEGORIA");
         return;
     }
     limpiarFormProducto();
-    cargarSelectCategorias();
-    $("tituloProducto").textContent = "AGREGAR PRODUCTO";
+    cargarSelectCategorias("");
+    document.getElementById("tituloProducto").textContent = "AGREGAR PRODUCTO";
     dialogProducto.showModal();
-};
+}
 
-const editarProducto = (posicion) => {
-    const p = productos[posicion];
+function editarProducto(posicion) {
+    var p = productos[posicion];
     limpiarFormProducto();
     cargarSelectCategorias(p.categoria);
-    $("nombre").value = p.nombre;
-    $("precio").value = p.precio;
-    $("stock").value = p.stock;
-    $("posicion").value = posicion;
+    document.getElementById("nombre").value = p.nombre;
+    document.getElementById("precio").value = p.precio;
+    document.getElementById("stock").value = p.stock;
+    document.getElementById("posicion").value = posicion;
     if (p.imagen) {
-        $("preview").src = p.imagen;
-        $("preview").style.display = "block";
+        document.getElementById("preview").src = p.imagen;
+        document.getElementById("preview").style.display = "block";
     }
-    $("tituloProducto").textContent = "EDITAR PRODUCTO";
+    document.getElementById("tituloProducto").textContent = "EDITAR PRODUCTO";
     dialogProducto.showModal();
-};
+}
 
-$("imagen").onchange = async () => {
-    const file = $("imagen").files[0];
+document.getElementById("imagen").onchange = function () {
+    var file = document.getElementById("imagen").files[0];
     if (file) {
-        $("preview").src = await leerImagen(file);
-        $("preview").style.display = "block";
+        leerImagen(file, function (imagen) {
+            document.getElementById("preview").src = imagen;
+            document.getElementById("preview").style.display = "block";
+        });
     }
 };
 
-$("btnSave").onclick = async () => {
-    const nombre = $("nombre").value.trim();
-    const precio = parseFloat($("precio").value);
-    const stock = parseInt($("stock").value);
-    const categoria = $("categoria").value;
-    const posicion = $("posicion").value;
-    const file = $("imagen").files[0];
+function guardarProducto(nombre, precio, stock, categoria, posicion, imagen) {
+    var producto = {
+        nombre: nombre,
+        precio: precio,
+        stock: stock,
+        categoria: categoria,
+        imagen: imagen
+    };
 
-    if (nombre === "" || $("precio").value === "" || $("stock").value === "" || categoria === "") {
+    if (posicion !== "") {
+        productos[posicion] = producto;
+    } else {
+        productos.push(producto);
+    }
+
+    guardarProductos();
+    dialogProducto.close();
+    cargarProductos();
+}
+
+document.getElementById("btnSave").onclick = function () {
+    var nombre = document.getElementById("nombre").value.trim();
+    var precio = parseFloat(document.getElementById("precio").value);
+    var stock = parseInt(document.getElementById("stock").value);
+    var categoria = document.getElementById("categoria").value;
+    var posicion = document.getElementById("posicion").value;
+    var file = document.getElementById("imagen").files[0];
+
+    if (nombre === "" || document.getElementById("precio").value === "" ||
+        document.getElementById("stock").value === "" || categoria === "") {
         error("CAMPOS VACIOS", dialogProducto);
         return;
     }
@@ -157,30 +213,21 @@ $("btnSave").onclick = async () => {
         return;
     }
 
-    const esEdicion = posicion !== "";
-    let imagen = esEdicion ? (productos[posicion].imagen || "") : "";
-    if (file) imagen = await leerImagen(file);
-
-    const producto = { nombre, precio, stock, categoria, imagen };
-
-    const respaldo = JSON.stringify(productos);
-    if (esEdicion) productos[posicion] = producto;
-    else productos.push(producto);
-
-    try {
-        guardarProductos();
-    } catch (e) {
-        productos = JSON.parse(respaldo);
-        error("NO HAY ESPACIO, USA UNA IMAGEN MAS PEQUEÑA", dialogProducto);
-        return;
+    if (file) {
+        leerImagen(file, function (imagen) {
+            guardarProducto(nombre, precio, stock, categoria, posicion, imagen);
+        });
+    } else {
+        var imagenActual = "";
+        if (posicion !== "") {
+            imagenActual = productos[posicion].imagen || "";
+        }
+        guardarProducto(nombre, precio, stock, categoria, posicion, imagenActual);
     }
-
-    dialogProducto.close();
-    cargarProductos();
 };
 
-const eliminarProducto = (posicion) => {
-    confirmar("Estas seguro de eliminar este registro?").then((result) => {
+function eliminarProducto(posicion) {
+    confirmar("Estas seguro de eliminar este registro?").then(function (result) {
         if (result.isConfirmed) {
             productos.splice(posicion, 1);
             guardarProductos();
@@ -188,57 +235,67 @@ const eliminarProducto = (posicion) => {
             exito("Se elimino correctamente");
         }
     });
-};
+}
 
-const cargarCategorias = () => {
-    let tabla = "";
-    categorias.forEach((c, i) => {
-        tabla += `<tr class="text-center">
-            <td><b>${escapar(c).toUpperCase()}</b></td>
-            <td>
-                <button class="btn-solid theme-danger" onclick="eliminarCategoria(${i})"><i class="bi bi-trash3"></i></button>
-                <button class="btn-solid theme-warning" onclick="editarCategoria(${i})"><i class="bi bi-pencil"></i></button>
-            </td>
-        </tr>`;
-    });
-    $("categorias").innerHTML = tabla;
-};
+function cargarCategorias() {
+    var tabla = "";
+    for (var i = 0; i < categorias.length; i++) {
+        tabla += '<tr class="text-center">' +
+            '<td><b>' + categorias[i].toUpperCase() + '</b></td>' +
+            '<td>' +
+            '<button class="btn-solid theme-danger" onclick="eliminarCategoria(' + i + ')"><i class="bi bi-trash3"></i></button> ' +
+            '<button class="btn-solid theme-warning" onclick="editarCategoria(' + i + ')"><i class="bi bi-pencil"></i></button>' +
+            '</td>' +
+            '</tr>';
+    }
+    document.getElementById("categorias").innerHTML = tabla;
+}
 
-const cerrarCategoria = () => dialogCategoria.close();
+function cerrarCategoria() {
+    dialogCategoria.close();
+}
 
-const nuevaCategoria = () => {
-    $("nombreCat").value = "";
-    $("posicionCat").value = "";
-    $("tituloCategoria").textContent = "AGREGAR CATEGORIA";
+function nuevaCategoria() {
+    document.getElementById("nombreCat").value = "";
+    document.getElementById("posicionCat").value = "";
+    document.getElementById("tituloCategoria").textContent = "AGREGAR CATEGORIA";
     dialogCategoria.showModal();
-};
+}
 
-const editarCategoria = (posicion) => {
-    $("nombreCat").value = categorias[posicion];
-    $("posicionCat").value = posicion;
-    $("tituloCategoria").textContent = "EDITAR CATEGORIA";
+function editarCategoria(posicion) {
+    document.getElementById("nombreCat").value = categorias[posicion];
+    document.getElementById("posicionCat").value = posicion;
+    document.getElementById("tituloCategoria").textContent = "EDITAR CATEGORIA";
     dialogCategoria.showModal();
-};
+}
 
-$("btnSaveCat").onclick = () => {
-    const nombre = $("nombreCat").value.trim();
-    const posicion = $("posicionCat").value;
+document.getElementById("btnSaveCat").onclick = function () {
+    var nombre = document.getElementById("nombreCat").value.trim();
+    var posicion = document.getElementById("posicionCat").value;
 
     if (nombre === "") {
         error("CAMPOS VACIOS", dialogCategoria);
         return;
     }
 
-    const repetida = categorias.some((c, i) =>
-        c.toLowerCase() === nombre.toLowerCase() && String(i) !== posicion);
+    var repetida = false;
+    for (var i = 0; i < categorias.length; i++) {
+        if (categorias[i].toLowerCase() === nombre.toLowerCase() && i != posicion) {
+            repetida = true;
+        }
+    }
     if (repetida) {
         error("LA CATEGORIA YA EXISTE", dialogCategoria);
         return;
     }
 
     if (posicion !== "") {
-        const anterior = categorias[posicion];
-        productos.forEach((p) => { if (p.categoria === anterior) p.categoria = nombre; });
+        var anterior = categorias[posicion];
+        for (var j = 0; j < productos.length; j++) {
+            if (productos[j].categoria === anterior) {
+                productos[j].categoria = nombre;
+            }
+        }
         categorias[posicion] = nombre;
         guardarProductos();
     } else {
@@ -251,13 +308,17 @@ $("btnSaveCat").onclick = () => {
     cargarProductos();
 };
 
-const eliminarCategoria = (posicion) => {
-    const nombre = categorias[posicion];
-    if (productos.some((p) => p.categoria === nombre)) {
-        error("HAY PRODUCTOS CON ESTA CATEGORIA");
-        return;
+function eliminarCategoria(posicion) {
+    var nombre = categorias[posicion];
+
+    for (var i = 0; i < productos.length; i++) {
+        if (productos[i].categoria === nombre) {
+            error("HAY PRODUCTOS CON ESTA CATEGORIA");
+            return;
+        }
     }
-    confirmar("Estas seguro de eliminar esta categoria?").then((result) => {
+
+    confirmar("Estas seguro de eliminar esta categoria?").then(function (result) {
         if (result.isConfirmed) {
             categorias.splice(posicion, 1);
             guardarCategorias();
@@ -265,7 +326,7 @@ const eliminarCategoria = (posicion) => {
             exito("Se elimino correctamente");
         }
     });
-};
+}
 
 cargarCategorias();
 cargarProductos();
